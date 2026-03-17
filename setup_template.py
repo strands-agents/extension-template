@@ -284,6 +284,20 @@ def main() -> None:
     # Clean up
     print("\n🧹 Cleaning up...")
 
+    # Remove template-specific files that don't belong to the user's project
+    cleanup_targets = [
+        "CODE_OF_CONDUCT.md",  # template repo's own conduct file
+        "CONTRIBUTING.md",     # template repo's own contributing guide
+        "NOTICE",              # Amazon's copyright notice for the template
+    ]
+    for target in cleanup_targets:
+        if os.path.exists(target):
+            if os.path.isdir(target):
+                shutil.rmtree(target)
+            else:
+                os.remove(target)
+            print(f"  ✓ Removed {target}")
+
     # Remove this setup script
     script_path = os.path.abspath(__file__)
     if os.path.exists(script_path):
