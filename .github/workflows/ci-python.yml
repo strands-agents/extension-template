@@ -1,14 +1,24 @@
-name: CI
+name: CI - Python
 
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'python/**'
+      - '.github/workflows/ci-python.yml'
   push:
     branches: [ main ]
+    paths:
+      - 'python/**'
+      - '.github/workflows/ci-python.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: python
 
 jobs:
   test:

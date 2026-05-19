@@ -187,6 +187,121 @@ def delete_unused_components(src_dir: str, selected: list[str]) -> None:
                     print(f"  ✓ Removed {filepath}")
 
 
+def _strip_monorepo_from_pyproject() -> None:
+    """Drop the monorepo-only [tool.hatch.version.raw-options] block."""
+    path = "pyproject.toml"
+    if not os.path.exists(path):
+        return
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+    new_text = re.sub(
+        r"\n\[tool\.hatch\.version\.raw-options\][^\[]*",
+        "\n",
+        text,
+        count=1,
+    )
+    if new_text != text:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(new_text)
+        print(f"  ✓ De-monorepoized {path}")
+
+
+def _strip_monorepo_from_readme() -> None:
+    """Drop the monorepo callout and the python-v tag-prefix wording."""
+    path = "README.md"
+    if not os.path.exists(path):
+        return
+    with open(path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    out: list[str] = []
+    # The "Run the setup script" section walks users through a script that has
+    # self-deleted by the time they read this README, so drop it and renumber
+    # the next heading.
+    skip_setup_section = False
+    for line in lines:
+        if line.startswith("### 2. Run the setup script"):
+            skip_setup_section = True
+            continue
+        if skip_setup_section:
+            if line.startswith("### "):
+                skip_setup_section = False
+                out.append(line.replace("### 3. ", "### 2. ", 1))
+            continue
+        if "This is the Python half of the" in line:
+            continue
+        # The hoist puts the package at the repo root, so the python/ subdir
+        # referenced in the clone instructions no longer exists.
+        line = line.replace("cd your-repo-name/python", "cd your-repo-name")
+        if "tag prefixed `python-v`" in line:
+            line = (
+                "2. Create a release on GitHub with a tag prefixed `v`, "
+                "e.g. `v0.1.0`. hatch-vcs strips the prefix so the package "
+                "version is just `0.1.0`.\n"
+            )
+        out.append(line)
+    with open(path, "w", encoding="utf-8") as f:
+        f.writelines(out)
+    print(f"  ✓ De-monorepoized {path}")
+
+
+def _hoist_workflows() -> None:
+    """Rewrite python workflow files in place and rename to root names."""
+    workflows_dir = "../.github/workflows"
+    ci_src = os.path.join(workflows_dir, "ci-python.yml")
+    if os.path.exists(ci_src):
+        with open(ci_src, "r", encoding="utf-8") as f:
+            ci = f.read()
+        ci = ci.replace("name: CI - Python", "name: CI")
+        ci = re.sub(r"\n    paths:\n(?:      - .+\n)+", "\n", ci)
+        ci = re.sub(r"\ndefaults:\n  run:\n    working-directory: python\n", "\n", ci)
+        ci_dst = os.path.join(workflows_dir, "ci.yml")
+        with open(ci_dst, "w", encoding="utf-8") as f:
+            f.write(ci)
+        os.remove(ci_src)
+        print(f"  ✓ Renamed {ci_src} → {ci_dst}")
+
+    pub_src = os.path.join(workflows_dir, "publish-python.yml")
+    if os.path.exists(pub_src):
+        with open(pub_src, "r", encoding="utf-8") as f:
+            pub = f.read()
+        pub = pub.replace("name: Publish Python to PyPI", "name: Publish to PyPI")
+        # Drop "Triggered when a release is published with a tag prefixed `python-v`..." comment
+        pub = re.sub(r"\n# Triggered when[^\n]*\n(?:# [^\n]*\n)*", "\n", pub)
+        # Drop check-tag job and `needs: check-tag` + `if:` guard
+        pub = re.sub(
+            r"  check-tag:\n(?:    [^\n]*\n|\n)+?(?=\n  [a-z])",
+            "",
+            pub,
+        )
+        pub = re.sub(r"    needs: check-tag\n    if: [^\n]+\n", "", pub)
+        pub = re.sub(r"\ndefaults:\n  run:\n    working-directory: python\n", "\n", pub)
+        pub = pub.replace("path: python/dist/", "path: dist/")
+        pub_dst = os.path.join(workflows_dir, "publish.yml")
+        with open(pub_dst, "w", encoding="utf-8") as f:
+            f.write(pub)
+        os.remove(pub_src)
+        print(f"  ✓ Renamed {pub_src} → {pub_dst}")
+
+
+def _hoist_to_root() -> str:
+    """Move contents of cwd (python/) to repo root, chdir there. Returns new cwd."""
+    src_root = os.path.abspath(".")
+    dst_root = os.path.abspath("..")
+    for entry in os.listdir(src_root):
+        src = os.path.join(src_root, entry)
+        dst = os.path.join(dst_root, entry)
+        if os.path.exists(dst):
+            if os.path.isdir(dst) and not os.path.islink(dst):
+                shutil.rmtree(dst)
+            else:
+                os.remove(dst)
+        shutil.move(src, dst)
+    os.chdir(dst_root)
+    os.rmdir(src_root)
+    print(f"  ✓ Hoisted python/ contents to repo root")
+    return dst_root
+
+
 def main() -> None:
     print("\n🔧 Strands Template Setup\n")
     print("This will customize the template for your project.\n")
@@ -284,11 +399,13 @@ def main() -> None:
     # Clean up
     print("\n🧹 Cleaning up...")
 
-    # Remove template-specific files that don't belong to the user's project
+    # Remove template-specific files that don't belong to the user's project.
+    # These live at the repo root (one level up from python/) since this is a
+    # monorepo template.
     cleanup_targets = [
-        "CODE_OF_CONDUCT.md",  # template repo's own conduct file
-        "CONTRIBUTING.md",     # template repo's own contributing guide
-        "NOTICE",              # Amazon's copyright notice for the template
+        "../CODE_OF_CONDUCT.md",  # template repo's own conduct file
+        "../CONTRIBUTING.md",     # template repo's own contributing guide
+        "../NOTICE",              # Amazon's copyright notice for the template
     ]
     for target in cleanup_targets:
         if os.path.exists(target):
@@ -298,13 +415,45 @@ def main() -> None:
                 os.remove(target)
             print(f"  ✓ Removed {target}")
 
-    # Remove this setup script
-    script_path = os.path.abspath(__file__)
+    # Optionally drop the sibling TypeScript half of the monorepo and hoist
+    # this package to the repo root so the generated repo looks like a normal
+    # single-language project.
+    print()
+    drop_sibling = get_input("Drop the TypeScript half and hoist this package to the repo root? (y/n)", "y")
+    hoisted = False
+    if drop_sibling.lower() == "y":
+        sibling_targets = [
+            "../typescript",
+            "../.github/workflows/ci-typescript.yml",
+            "../.github/workflows/publish-typescript.yml",
+            "../README.md",
+        ]
+        for target in sibling_targets:
+            if os.path.exists(target):
+                if os.path.isdir(target):
+                    shutil.rmtree(target)
+                else:
+                    os.remove(target)
+                print(f"  ✓ Removed {target}")
+
+        _strip_monorepo_from_pyproject()
+        _strip_monorepo_from_readme()
+        _hoist_workflows()
+        _hoist_to_root()
+        hoisted = True
+
+    # Remove this setup script (path may have changed if we hoisted).
+    script_path = os.path.abspath("setup_template.py" if hoisted else __file__)
     if os.path.exists(script_path):
         os.remove(script_path)
         print("  ✓ Removed setup_template.py")
 
     print("\n✅ Setup complete!\n")
+    if hoisted:
+        print(
+            "⚠️  Your shell is still in the now-deleted python/ directory. "
+            "Run `cd ..` before continuing.\n"
+        )
     print("Next steps:")
     print("  1. Review the generated files")
     print("  2. Install dev dependencies: pip install -e '.[dev]'")

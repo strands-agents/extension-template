@@ -1,0 +1,68 @@
+{
+  "name": "strands-template",
+  "version": "0.0.0",
+  "description": "Your package description",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "setup": "tsx setup-template.ts",
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist node_modules",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "format": "prettier --write src test",
+    "format:check": "prettier --check src test",
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "check": "npm run format:check && npm run lint && npm run type-check && npm run test"
+  },
+  "keywords": [
+    "strands",
+    "agents",
+    "ai",
+    "tool"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/strands-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/strands-template/issues"
+  },
+  "homepage": "https://github.com/yourusername/strands-template#readme",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "peerDependencies": {
+    "@strands-agents/sdk": ">=1.0.0 <2.0.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@strands-agents/sdk": ">=1.0.0 <2.0.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0",
+    "zod": "^4.1.12"
+  }
+}

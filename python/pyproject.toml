@@ -47,6 +47,17 @@ dev = [
 [tool.hatch.version]
 source = "vcs"
 
+[tool.hatch.version.raw-options]
+# The git repo lives one level up (this is a monorepo with python/ and typescript/
+# siblings under the same .git). Tell setuptools-scm where to look.
+root = ".."
+# Match release tags like `python-v0.1.0` and strip the `python-v` prefix.
+# This lets the monorepo distinguish python and typescript releases via tag prefix.
+tag_regex = "^python-v(?P<version>.+)$"
+# setuptools-scm refuses non-default `root` unless given a reference file.
+# `pyproject.toml` is always present next to itself, so it's a safe anchor.
+relative_to = "pyproject.toml"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/strands_template"]
 
