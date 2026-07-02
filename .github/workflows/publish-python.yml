@@ -20,8 +20,10 @@ jobs:
       should_publish: ${{ steps.check.outputs.should_publish }}
     steps:
       - id: check
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
-          if [[ "${{ github.event.release.tag_name }}" == python-v* ]]; then
+          if [[ "$TAG_NAME" == python-v* ]]; then
             echo "should_publish=true" >> "$GITHUB_OUTPUT"
           else
             echo "should_publish=false" >> "$GITHUB_OUTPUT"
