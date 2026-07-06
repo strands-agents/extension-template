@@ -56,6 +56,13 @@ COMPONENTS = {
         "test_files": ["test_conversation_manager.py"],
         "exports": ["TemplateConversationManager"],
     },
+    "memory_store": {
+        "name": "Memory Store",
+        "description": "Give agents cross-session knowledge via a search backend",
+        "files": ["memory_store.py"],
+        "test_files": ["test_memory_store.py"],
+        "exports": ["TemplateMemoryStore"],
+    },
 }
 
 
@@ -352,6 +359,7 @@ def main() -> None:
         "TemplatePlugin": f"{pascal_name}Plugin",
         "TemplateSessionManager": f"{pascal_name}SessionManager",
         "TemplateConversationManager": f"{pascal_name}ConversationManager",
+        "TemplateMemoryStore": f"{pascal_name}MemoryStore",
         # Function names
         "template_tool": f"{snake_name}_tool",
         # Plugin name

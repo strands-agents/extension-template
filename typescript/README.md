@@ -63,6 +63,7 @@ The template includes skeleton implementations for all major Strands extension p
 | `src/plugin.ts` | Plugin | Extend agent behavior with hooks and tools in a composable package |
 | `src/session-manager.ts` | Snapshot storage | Persist conversations across restarts (a `SnapshotStorage` impl plugged into the SDK's `SessionManager`) |
 | `src/conversation-manager.ts` | Conversation manager | Control context window and message history |
+| `src/memory-store.ts` | Memory store | Give agents cross-session knowledge via a search backend |
 
 The setup script will remove components you don't select, so you only keep what you need.
 
@@ -101,6 +102,12 @@ Session persistence lives behind the `SnapshotStorage` interface — implement i
 Conversation managers control the context window and how message history grows over time. Override `reduce()` to mutate `agent.messages` in place when the context window is at risk.
 
 - The SDK ships `SlidingWindowConversationManager` and `SummarizingConversationManager` as references.
+
+### Memory stores
+
+Memory stores give agents cross-session knowledge. A `MemoryManager` searches one or more stores to recall facts and, for writable stores, writes new ones. Implement `search()` to back memory with your own store — a vector database, a managed search service, or any system that retrieves entries by relevance. For writes, implement whichever sinks fit your backend. `add()` for adding an extracted memory. For discrete-entry backend (e.g. a vector DB), only implement this method. `addMessages()` for ingesting raw conversation turns to extract server-side. Only implement this for backends that support server side extraction. Store identity and behavior (`name`, `description`, `maxSearchResults`, `writable`, `extraction`) come from config via `MemoryStoreConfig`, matching the SDK's own stores; extend `TemplateMemoryStoreConfig` with any backend-specific fields.
+
+- The SDK's `BedrockKnowledgeBaseStore` is a worked `MemoryStore` implementation.
 
 ## Testing
 
@@ -151,6 +158,7 @@ Follow these conventions so your package fits the Strands ecosystem:
 | Plugin class | `{Name}Plugin` | `AmazonPlugin` |
 | Snapshot storage | `{Name}SnapshotStorage` | `RedisSnapshotStorage` |
 | Conversation manager | `{Name}ConversationManager` | `SummarizingConversationManager` |
+| Memory store | `{Name}MemoryStore` | `RedisMemoryStore` |
 | Tool factory output | `{descriptiveName}` (camelCase) | `searchWeb`, `sendEmail` |
 
 ## Get featured

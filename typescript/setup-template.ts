@@ -70,6 +70,13 @@ const COMPONENTS: Record<string, ComponentSpec> = {
     testFiles: ['conversation-manager.test.ts'],
     exports: ['TemplateConversationManager'],
   },
+  memory_store: {
+    name: 'Memory Store',
+    description: 'Give agents cross-session knowledge via a search backend',
+    files: ['memory-store.ts'],
+    testFiles: ['memory-store.test.ts'],
+    exports: ['TemplateMemoryStore', 'TemplateMemoryStoreConfig'],
+  },
 }
 
 const SRC_DIR = 'src'
@@ -235,6 +242,7 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     // so the file names in the index.ts get rewritten too.
     'session-manager': `${kebabName}-session-manager`,
     'conversation-manager': `${kebabName}-conversation-manager`,
+    'memory-store': `${kebabName}-memory-store`,
     // Class names
     TemplateModelConfig: `${pascalName}ModelConfig`,
     TemplateModel: `${pascalName}Model`,
@@ -242,6 +250,8 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     TemplateSnapshotStorageConfig: `${pascalName}SnapshotStorageConfig`,
     TemplateSnapshotStorage: `${pascalName}SnapshotStorage`,
     TemplateConversationManager: `${pascalName}ConversationManager`,
+    TemplateMemoryStoreConfig: `${pascalName}MemoryStoreConfig`,
+    TemplateMemoryStore: `${pascalName}MemoryStore`,
     // Tool function name
     templateTool: `${camelName}Tool`,
     // Plugin name string in initializer
