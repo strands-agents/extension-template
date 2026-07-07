@@ -61,6 +61,7 @@ The template includes skeleton implementations for all major Strands extension p
 | `plugin.py` | Plugin | Extend agent behavior with hooks and tools in a composable package |
 | `session_manager.py` | Session manager | Persist conversations across restarts |
 | `conversation_manager.py` | Conversation manager | Control context window and message history |
+| `memory_store.py` | Memory store | Give agents cross-session knowledge via a search backend |
 
 The setup script will remove components you don't select, so you only keep what you need.
 
@@ -104,6 +105,12 @@ Conversation managers control the context window and how message history grows o
 
 - [Conversation management](https://strandsagents.com/latest/user-guide/concepts/agents/conversation-management/) — Documentation
 - [Sliding window manager](https://github.com/strands-agents/sdk-python/blob/main/src/strands/agent/conversation_manager/sliding_window_conversation_manager.py) — Implementation example
+
+### Memory stores
+
+Memory stores give agents cross-session knowledge. A `MemoryManager` searches one or more stores to recall facts and, for writable stores, writes new ones. Implement `search()` to back memory with your own store — a vector database, a managed search service, or any system that retrieves entries by relevance. For writes, implement whichever sinks fit your backend. `add()` for adding an extracted memory. For discrete-entry backend (e.g. a vector DB), only implement this method. `add_messages()` for ingesting raw conversation turns to extract server-side. Only implement this for backends that support server side extraction. Store identity and behavior (`name`, `description`, `max_search_results`, `writable`, `extraction`) come from config via `MemoryStoreConfig`, matching the SDK's own stores; extend `TemplateMemoryStoreConfig` with any backend-specific fields.
+
+- [Bedrock Knowledge Base store](https://github.com/strands-agents/sdk-python/tree/main/src/strands/vended_memory_stores/bedrock_knowledge_base) — Implementation example
 
 ## Testing
 
@@ -162,6 +169,7 @@ Follow these conventions so your package fits the Strands ecosystem:
 | Plugin class | `{Name}Plugin` | `AmazonPlugin` |
 | Session manager | `{Name}SessionManager` | `RedisSessionManager` |
 | Conversation manager | `{Name}ConversationManager` | `SummarizingConversationManager` |
+| Memory store | `{Name}MemoryStore` | `RedisMemoryStore` |
 | Tool function | `{descriptive_name}` | `search_web`, `send_email` |
 
 ## Get featured
