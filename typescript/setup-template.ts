@@ -56,6 +56,13 @@ const COMPONENTS: Record<string, ComponentSpec> = {
     testFiles: ['plugin.test.ts'],
     exports: ['TemplatePlugin'],
   },
+  intervention: {
+    name: 'Intervention',
+    description: 'Add composable control handlers for authorization, guardrails, and steering',
+    files: ['intervention.ts'],
+    testFiles: ['intervention.test.ts'],
+    exports: ['TemplateIntervention'],
+  },
   session_manager: {
     name: 'Session Storage',
     description: 'Persist conversations across restarts',
@@ -247,6 +254,7 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     TemplateModelConfig: `${pascalName}ModelConfig`,
     TemplateModel: `${pascalName}Model`,
     TemplatePlugin: `${pascalName}Plugin`,
+    TemplateIntervention: `${pascalName}Intervention`,
     TemplateSnapshotStorageConfig: `${pascalName}SnapshotStorageConfig`,
     TemplateSnapshotStorage: `${pascalName}SnapshotStorage`,
     TemplateConversationManager: `${pascalName}ConversationManager`,
@@ -256,6 +264,7 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     templateTool: `${camelName}Tool`,
     // Plugin name string in initializer
     'template-plugin': `${kebabName}-plugin`,
+    'template-intervention': `${kebabName}-intervention`,
     'template-conversation-manager': `${kebabName}-conversation-manager`,
     template_tool: `${camelName.replace(/([A-Z])/g, '_$1').toLowerCase()}_tool`,
     // Author/repo metadata
