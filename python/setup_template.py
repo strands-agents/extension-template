@@ -56,6 +56,13 @@ COMPONENTS = {
         "test_files": ["test_conversation_manager.py"],
         "exports": ["TemplateConversationManager"],
     },
+    "intervention": {
+        "name": "Intervention",
+        "description": "Add composable control handlers for authorization, guardrails, and steering",
+        "files": ["intervention.py"],
+        "test_files": ["test_intervention.py"],
+        "exports": ["TemplateIntervention"],
+    },
     "memory_store": {
         "name": "Memory Store",
         "description": "Give agents cross-session knowledge via a search backend",
@@ -357,6 +364,7 @@ def main() -> None:
         # Class names
         "TemplateModel": f"{pascal_name}Model",
         "TemplatePlugin": f"{pascal_name}Plugin",
+        "TemplateIntervention": f"{pascal_name}Intervention",
         "TemplateSessionManager": f"{pascal_name}SessionManager",
         "TemplateConversationManager": f"{pascal_name}ConversationManager",
         "TemplateMemoryStore": f"{pascal_name}MemoryStore",
@@ -364,6 +372,7 @@ def main() -> None:
         "template_tool": f"{snake_name}_tool",
         # Plugin name
         "template-plugin": f"{kebab_name}-plugin",
+        "template-intervention": f"{kebab_name}-intervention",
         # Author info
         "Your Name": author_name,
         "your.email@example.com": author_email,
