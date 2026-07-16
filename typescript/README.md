@@ -9,7 +9,7 @@
   <p>
     <a href="https://strandsagents.com/">Documentation</a> ◆
     <a href="https://github.com/strands-agents/sdk-typescript">TypeScript SDK</a> ◆
-    <a href="https://strandsagents.com/latest/community/community-packages/">Community Packages</a>
+    <a href="https://strandsagents.com/docs/community/community-packages/">Community Packages</a>
   </p>
 </div>
 
@@ -61,6 +61,7 @@ The template includes skeleton implementations for all major Strands extension p
 | `src/tool.ts` | Tool | Add capabilities to agents using the `tool` factory |
 | `src/model.ts` | Model provider | Integrate custom LLM APIs |
 | `src/plugin.ts` | Plugin | Extend agent behavior with hooks and tools in a composable package |
+| `src/intervention.ts` | Intervention | Add composable control handlers for authorization, guardrails, and steering |
 | `src/session-manager.ts` | Snapshot storage | Persist conversations across restarts (a `SnapshotStorage` impl plugged into the SDK's `SessionManager`) |
 | `src/conversation-manager.ts` | Conversation manager | Control context window and message history |
 | `src/memory-store.ts` | Memory store | Give agents cross-session knowledge via a search backend |
@@ -75,15 +76,22 @@ Each file contains a minimal skeleton. Here's what to implement:
 
 Tools let agents interact with external systems and perform actions. Implement your callback inside `src/tool.ts`. Use a Zod schema for typed/validated input or a JSON schema for untyped input.
 
-- [Custom tools](https://strandsagents.com/) — Documentation
+- [Custom tools](https://strandsagents.com/docs/user-guide/concepts/tools/custom-tools/) — Documentation
 - See the `tool` factory in `@strands-agents/sdk` for full options.
 
 ### Plugins
 
 Plugins provide a composable way to extend agent behavior by bundling hooks and tools into a single package. Implement `initAgent` to register hooks and `getTools` to contribute tools.
 
-- [Plugins](https://strandsagents.com/) — Documentation
+- [Plugins](https://strandsagents.com/docs/user-guide/concepts/plugins/) — Documentation
 - The SDK's `SessionManager` and `vended-plugins/skills` are good worked examples.
+
+### Interventions
+
+Intervention handlers provide composable control layers for agents. Override lifecycle methods (like `beforeToolCall`) to intercept events and return typed decisions: proceed, deny, guide, confirm, or transform. Use them for authorization checks, guardrails, and human-in-the-loop approval.
+
+- [Interventions](https://strandsagents.com/docs/user-guide/concepts/agents/interventions/) — Documentation
+- The SDK's `vended-interventions` (Cedar authorization, HITL, steering) are worked examples.
 
 ### Model providers
 
@@ -95,7 +103,7 @@ Model providers connect agents to LLM APIs by extending the `Model` base class. 
 
 Session persistence lives behind the `SnapshotStorage` interface — implement it to add new backends (S3, Redis, custom DB). The SDK's `FileStorage` is a worked example.
 
-- [Session management](https://strandsagents.com/) — Documentation
+- [Session management](https://strandsagents.com/docs/user-guide/concepts/agents/session-management/) — Documentation
 
 ### Conversation managers
 
@@ -156,6 +164,7 @@ Follow these conventions so your package fits the Strands ecosystem:
 | npm package | `strands-{name}` | `strands-amazon` |
 | Model class | `{Name}Model` | `AmazonModel` |
 | Plugin class | `{Name}Plugin` | `AmazonPlugin` |
+| Intervention class | `{Name}Intervention` | `CedarIntervention` |
 | Snapshot storage | `{Name}SnapshotStorage` | `RedisSnapshotStorage` |
 | Conversation manager | `{Name}ConversationManager` | `SummarizingConversationManager` |
 | Memory store | `{Name}MemoryStore` | `RedisMemoryStore` |
@@ -163,13 +172,13 @@ Follow these conventions so your package fits the Strands ecosystem:
 
 ## Get featured
 
-Help others discover your package by adding the `strands-agents` topic to your GitHub repository. You can also submit your package to be featured on the Strands website. See [Get Featured](https://strandsagents.com/latest/community/get-featured/) for details.
+Help others discover your package by adding the `strands-agents` topic to your GitHub repository. You can also submit your package to be featured on the Strands website. See [Get Featured](https://strandsagents.com/docs/community/get-featured/) for details.
 
 ## Resources
 
 - [Strands Agents documentation](https://strandsagents.com/)
 - [TypeScript SDK repository](https://github.com/strands-agents/sdk-typescript)
-- [Community packages](https://strandsagents.com/latest/community/community-packages/)
+- [Community packages](https://strandsagents.com/docs/community/community-packages/)
 
 ## License
 
