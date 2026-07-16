@@ -11,7 +11,7 @@
     <a href="https://github.com/strands-agents/sdk-python">Python SDK</a> ◆
     <a href="https://github.com/strands-agents/sdk-typescript">TypeScript SDK</a> ◆
     <a href="https://github.com/strands-agents/tools">Tools</a> ◆
-    <a href="https://strandsagents.com/latest/community/community-packages/">Community Packages</a>
+    <a href="https://strandsagents.com/docs/community/community-packages/">Community Packages</a>
   </p>
 </div>
 
@@ -34,13 +34,14 @@ You can keep both subprojects in the same repo if your package ships SDKs in bot
 
 ## What's in each template
 
-Both templates expose the same six Strands extension points so you can pick whichever fits your use case:
+Both templates expose the same seven Strands extension points so you can pick whichever fits your use case:
 
 | Component            | Purpose                                                |
 |----------------------|--------------------------------------------------------|
 | Tool                 | Add capabilities to agents using the `tool` primitive  |
 | Model provider       | Integrate custom LLM APIs                              |
 | Plugin               | Bundle hooks and tools into a composable package       |
+| Intervention         | Add composable control handlers for authorization, guardrails, and steering |
 | Session manager      | Persist conversations across restarts                  |
 | Conversation manager | Control context window and message history            |
 | Memory store         | Give agents cross-session knowledge via a search backend |
