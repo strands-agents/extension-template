@@ -11,6 +11,12 @@ on:
     paths:
       - 'typescript/**'
       - '.github/workflows/ci-typescript.yml'
+  schedule:
+    # Weekly canary against the newest SDK release. The template's wide
+    # peer range (>=1.0.0 <2.0.0) means new users always resolve the latest
+    # SDK, but PR CI installs from the lockfile — this catches SDK drift
+    # (removed exports, changed types) before a new user hits it.
+    - cron: '0 6 * * 1'
 
 permissions:
   contents: read
@@ -26,6 +32,7 @@ defaults:
 jobs:
   test:
     name: Test - Node ${{ matrix.node-version }}
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -51,6 +58,7 @@ jobs:
 
   lint:
     name: Lint
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
 
     steps:
@@ -75,3 +83,33 @@ jobs:
 
       - name: Type check
         run: npm run type-check
+
+  sdk-compat:
+    name: Latest SDK compatibility
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update SDK to latest in range
+        run: |
+          npm update @strands-agents/sdk
+          npm ls @strands-agents/sdk
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm test

@@ -11,6 +11,12 @@ on:
     paths:
       - 'python/**'
       - '.github/workflows/ci-python.yml'
+  schedule:
+    # Weekly canary against the newest SDK release. The template's open
+    # floor (strands-agents>=1.0.0) means new users always resolve the
+    # latest SDK — this catches SDK drift (removed exports, changed types)
+    # before a new user hits it.
+    - cron: '0 6 * * 1'
 
 permissions:
   contents: read
@@ -26,6 +32,7 @@ defaults:
 jobs:
   test:
     name: Test - Python ${{ matrix.python-version }}
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -52,6 +59,7 @@ jobs:
 
   lint:
     name: Lint
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
 
     steps:
@@ -77,3 +85,34 @@ jobs:
 
       - name: Type check
         run: hatch run typecheck
+
+  sdk-compat:
+    name: Latest SDK compatibility
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install hatch
+        run: pip install hatch
+
+      - name: Update SDK to latest
+        run: |
+          hatch run pip install --upgrade strands-agents
+          hatch run pip show strands-agents
+
+      - name: Type check
+        run: hatch run typecheck
+
+      - name: Run tests
+        run: hatch run test
