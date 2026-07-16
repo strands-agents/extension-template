@@ -14,13 +14,12 @@
  * ```
  */
 
-import {
-  InterventionHandler,
-  InterventionActions,
-  type BeforeToolCallEvent,
-  type Proceed,
-  type Deny,
-} from '@strands-agents/sdk'
+import { InterventionHandler, InterventionActions, type BeforeToolCallEvent } from '@strands-agents/sdk'
+
+// The SDK's root entry point doesn't export the action types directly,
+// so derive them from the action creators.
+type Proceed = ReturnType<typeof InterventionActions.proceed>
+type Deny = ReturnType<typeof InterventionActions.deny>
 
 export class TemplateIntervention extends InterventionHandler {
   readonly name = 'template-intervention'
