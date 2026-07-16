@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from strands.hooks.events import BeforeToolCallEvent
-from strands.interventions import InterventionHandler, Proceed, Deny
+from strands.interventions import Deny, InterventionHandler, Proceed
 
 logger = logging.getLogger(__name__)
 
