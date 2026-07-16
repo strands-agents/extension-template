@@ -426,6 +426,63 @@ function stripMonorepoFromReadme(): void {
   console.log(`  ✓ De-monorepoized ${readmePath}`)
 }
 
+const HOISTED_DEPENDABOT = `\
+# Dependabot configuration. Weekly polling with a cooldown so we don't churn
+# on same-day releases; majors wait 30 days so a human can vet breaking
+# changes. Minor/patch and dev-tooling updates arrive as grouped PRs; majors
+# arrive individually.
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 100
+    labels:
+      - 'dependencies'
+    commit-message:
+      prefix: ci
+    versioning-strategy: increase-if-necessary
+    cooldown:
+      default-days: 5
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    groups:
+      # All development dependencies in one PR.
+      development-dependencies:
+        dependency-type: 'development'
+        applies-to: version-updates
+      # Production minor + patch bumps in one PR.
+      production-minor:
+        dependency-type: 'production'
+        applies-to: version-updates
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Major updates aren't matched by any group, so they get individual PRs.
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 100
+    commit-message:
+      prefix: ci
+    cooldown:
+      default-days: 5
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+`
+
+function hoistDependabot(): void {
+  // Replace the monorepo dependabot config with a single-ecosystem one.
+  const dependabotPath = '../.github/dependabot.yml'
+  if (!fs.existsSync(dependabotPath)) return
+  fs.writeFileSync(dependabotPath, HOISTED_DEPENDABOT, 'utf8')
+  console.log(`  ✓ De-monorepoized ${dependabotPath}`)
+}
+
 function hoistWorkflows(): void {
   const workflowsDir = '../.github/workflows'
 
@@ -496,6 +553,7 @@ async function dropMonorepoSibling(prompter: Prompter): Promise<boolean> {
   }
 
   stripMonorepoFromReadme()
+  hoistDependabot()
   hoistWorkflows()
   hoistToRoot()
   return true

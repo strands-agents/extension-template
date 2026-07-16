@@ -258,6 +258,73 @@ def _strip_monorepo_from_readme() -> None:
     print(f"  ✓ De-monorepoized {path}")
 
 
+_HOISTED_DEPENDABOT = """\
+# Dependabot configuration. Weekly polling with a cooldown so we don't churn
+# on same-day releases; majors wait 30 days so a human can vet breaking
+# changes. Minor/patch and dev-tooling updates arrive as grouped PRs; majors
+# arrive individually.
+version: 2
+updates:
+  - package-ecosystem: 'pip'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 100
+    labels:
+      - 'dependencies'
+    commit-message:
+      prefix: ci
+    versioning-strategy: increase-if-necessary
+    cooldown:
+      default-days: 5
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    groups:
+      # Dev tooling in one PR, matched by name because Dependabot does not
+      # classify PEP 621 pyproject dependencies as development vs production.
+      # Keep these patterns in sync with the dev extra in pyproject.toml.
+      development-dependencies:
+        applies-to: version-updates
+        patterns:
+          - 'hatch'
+          - 'mypy'
+          - 'pytest*'
+          - 'ruff'
+      # Everything else: minor + patch bumps in one PR.
+      production-minor:
+        applies-to: version-updates
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Major updates aren't matched by any group, so they get individual PRs.
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 100
+    commit-message:
+      prefix: ci
+    cooldown:
+      default-days: 5
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+"""
+
+
+def _hoist_dependabot() -> None:
+    """Replace the monorepo dependabot config with a single-ecosystem one."""
+    path = "../.github/dependabot.yml"
+    if not os.path.exists(path):
+        return
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(_HOISTED_DEPENDABOT)
+    print(f"  ✓ De-monorepoized {path}")
+
+
 def _hoist_workflows() -> None:
     """Rewrite python workflow files in place and rename to root names."""
     workflows_dir = "../.github/workflows"
@@ -455,6 +522,7 @@ def main() -> None:
 
         _strip_monorepo_from_pyproject()
         _strip_monorepo_from_readme()
+        _hoist_dependabot()
         _hoist_workflows()
         _hoist_to_root()
         hoisted = True
