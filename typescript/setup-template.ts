@@ -18,7 +18,7 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import * as readline from 'node:readline/promises'
+import * as readline from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import { fileURLToPath } from 'node:url'
 
@@ -115,7 +115,13 @@ function toKebabCase(name: string): string {
 
 function toCamelCase(name: string): string {
   const words = name.split(/[-_\s]+/).filter(Boolean)
-  return words[0]!.toLowerCase() + words.slice(1).map((w) => w[0]!.toUpperCase() + w.slice(1).toLowerCase()).join('')
+  return (
+    words[0]!.toLowerCase() +
+    words
+      .slice(1)
+      .map((w) => w[0]!.toUpperCase() + w.slice(1).toLowerCase())
+      .join('')
+  )
 }
 
 function toPascalCase(name: string): string {
@@ -149,14 +155,48 @@ function replaceInFile(filepath: string, replacements: Record<string, string>): 
 
 class Prompter {
   private readonly _rl: readline.Interface
+  // Buffer lines as they arrive. With piped stdin (CI, `printf ... | npm run
+  // setup`) all lines can arrive before the next question() is pending, and
+  // readline drops line events nobody is listening for — so queue them here.
+  private readonly _lines: string[] = []
+  private _pending: ((line: string) => void) | null = null
+  private _closed = false
 
   constructor() {
     this._rl = readline.createInterface({ input, output })
+    this._rl.on('line', (line) => {
+      if (this._pending) {
+        const resolve = this._pending
+        this._pending = null
+        resolve(line)
+      } else {
+        this._lines.push(line)
+      }
+    })
+    this._rl.on('close', () => {
+      this._closed = true
+      if (this._pending) {
+        const resolve = this._pending
+        this._pending = null
+        resolve('')
+      }
+    })
   }
 
   async ask(question: string, defaultValue = ''): Promise<string> {
     const suffix = defaultValue ? ` [${defaultValue}]` : ''
-    const answer = (await this._rl.question(`${question}${suffix}: `)).trim()
+    output.write(`${question}${suffix}: `)
+    const line =
+      this._lines.length > 0
+        ? this._lines.shift()!
+        : this._closed
+          ? ''
+          : await new Promise<string>((resolve) => {
+              this._pending = resolve
+            })
+    // Echo piped answers so non-interactive logs stay readable.
+    if (!input.isTTY) output.write(`${line}\n`)
+    const answer = line.trim()
     return answer || defaultValue
   }
 
@@ -243,13 +283,17 @@ async function gatherProjectInfo(prompter: Prompter): Promise<ProjectInfo> {
 function buildReplacements(info: ProjectInfo): Record<string, string> {
   const { kebabName, camelName, pascalName, authorName, authorEmail, githubUsername, description } = info
   return {
+    // Replacements are applied sequentially, so no key may be a substring of
+    // another key's replacement value (the second pass would re-match inside
+    // the first pass's output). Component file names are intentionally NOT
+    // renamed — like the Python template, generated projects keep tool.ts,
+    // session-manager.ts, etc.
     // Package name
     'strands-template': `strands-${kebabName}`,
-    // Module file names. Order matters: do this before TemplateXxx replacements
-    // so the file names in the index.ts get rewritten too.
-    'session-manager': `${kebabName}-session-manager`,
-    'conversation-manager': `${kebabName}-conversation-manager`,
-    'memory-store': `${kebabName}-memory-store`,
+    // Name strings in initializers
+    'template-plugin': `${kebabName}-plugin`,
+    'template-intervention': `${kebabName}-intervention`,
+    'template-conversation-manager': `${kebabName}-conversation-manager`,
     // Class names
     TemplateModelConfig: `${pascalName}ModelConfig`,
     TemplateModel: `${pascalName}Model`,
@@ -262,10 +306,6 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     TemplateMemoryStore: `${pascalName}MemoryStore`,
     // Tool function name
     templateTool: `${camelName}Tool`,
-    // Plugin name string in initializer
-    'template-plugin': `${kebabName}-plugin`,
-    'template-intervention': `${kebabName}-intervention`,
-    'template-conversation-manager': `${kebabName}-conversation-manager`,
     template_tool: `${camelName.replace(/([A-Z])/g, '_$1').toLowerCase()}_tool`,
     // Author/repo metadata
     'Your Name': authorName,
@@ -316,25 +356,6 @@ function deleteUnusedComponents(selected: string[]): void {
   }
 }
 
-function renameSelectedFiles(selected: string[], replacements: Record<string, string>): void {
-  // Re-derive the new file name from replacements (e.g. session-manager.ts ->
-  // <kebab>-session-manager.ts).
-  const renameIn = (dir: string, filename: string): void => {
-    const oldPath = path.join(dir, filename)
-    const newPath = path.join(dir, applyReplacements(filename, replacements))
-    if (oldPath !== newPath && fs.existsSync(oldPath)) {
-      fs.renameSync(oldPath, newPath)
-      console.log(`  ✓ Renamed ${oldPath} → ${newPath}`)
-    }
-  }
-
-  for (const key of selected) {
-    const info = COMPONENTS[key]!
-    for (const filename of info.files) renameIn(SRC_DIR, filename)
-    for (const filename of info.testFiles) renameIn(TEST_DIR, filename)
-  }
-}
-
 function writeIndexFile(selected: string[], replacements: Record<string, string>): void {
   const lines: string[] = []
   lines.push('/**')
@@ -370,7 +391,13 @@ function writeIndexFile(selected: string[], replacements: Record<string, string>
 function removeTemplateOnlyFiles(): void {
   // These live at the repo root (one level up from typescript/) since this is
   // a monorepo template.
-  const cleanupTargets = ['../CODE_OF_CONDUCT.md', '../CONTRIBUTING.md', '../NOTICE']
+  const cleanupTargets = [
+    '../CODE_OF_CONDUCT.md',
+    '../CONTRIBUTING.md',
+    '../NOTICE',
+    // Exercises the setup scripts, which self-delete — meaningless in generated repos.
+    '../.github/workflows/ci-setup.yml',
+  ]
   for (const target of cleanupTargets) {
     if (fs.existsSync(target)) {
       fs.rmSync(target, { recursive: true, force: true })
@@ -412,11 +439,11 @@ function stripMonorepoFromReadme(): void {
     // Without the setup script, this preamble no longer makes sense.
     next = next.replace(
       /After the setup script finishes, install peer \+ dev dependencies:/g,
-      'Install peer and dev dependencies:',
+      'Install peer and dev dependencies:'
     )
     next = next.replace(
       /tag prefixed `typescript-v` \(e\.g\. `typescript-v0\.1\.0`\)/g,
-      'tag prefixed `v` (e.g. `v0.1.0`)',
+      'tag prefixed `v` (e.g. `v0.1.0`)'
     )
     next = next.replace(/ The prefix lets the monorepo distinguish python and typescript releases\./g, '')
     next = next.replace(/`typescript-v0\.1\.0`/g, '`v0.1.0`')
@@ -533,10 +560,7 @@ function hoistToRoot(): void {
 
 async function dropMonorepoSibling(prompter: Prompter): Promise<boolean> {
   console.log()
-  const dropSibling = await prompter.ask(
-    'Drop the Python half and hoist this package to the repo root? (y/n)',
-    'y',
-  )
+  const dropSibling = await prompter.ask('Drop the Python half and hoist this package to the repo root? (y/n)', 'y')
   if (dropSibling.toLowerCase() !== 'y') return false
 
   const siblingTargets = [
@@ -593,9 +617,7 @@ function removeSelfScript(hoisted: boolean): void {
 function printNextSteps(hoisted: boolean): void {
   console.log('\n✅ Setup complete!\n')
   if (hoisted) {
-    console.log(
-      '⚠️  Your shell is still in the now-deleted typescript/ directory. Run `cd ..` before continuing.\n',
-    )
+    console.log('⚠️  Your shell is still in the now-deleted typescript/ directory. Run `cd ..` before continuing.\n')
   }
   console.log('Next steps:')
   console.log('  1. Review the generated files')
@@ -624,7 +646,6 @@ async function main(): Promise<void> {
     console.log('\n\u{1F5D1}️  Removing unused components...')
     deleteUnusedComponents(info.selected)
 
-    renameSelectedFiles(info.selected, replacements)
     writeIndexFile(info.selected, replacements)
 
     console.log('\n\u{1F9F9} Cleaning up...')
