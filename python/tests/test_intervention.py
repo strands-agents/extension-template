@@ -3,7 +3,7 @@
 from strands_template import TemplateIntervention
 
 
-def test_template_intervention_init():
-    """Test initialization."""
+def test_template_intervention_exposes_name():
+    """The handler exposes its stable name."""
     handler = TemplateIntervention()
-    assert handler.name is not None
+    assert handler.name == "template-intervention"

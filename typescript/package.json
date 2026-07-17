@@ -27,7 +27,7 @@
     "lint:fix": "eslint src test --fix",
     "format": "prettier --write src test",
     "format:check": "prettier --check src test",
-    "type-check": "tsc --noEmit -p tsconfig.json",
+    "type-check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
     "check": "npm run format:check && npm run lint && npm run type-check && npm run test"
   },
   "keywords": [

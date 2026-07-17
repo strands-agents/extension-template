@@ -1,9 +1,11 @@
 """Tests for TemplateConversationManager."""
 
+from strands.agent.conversation_manager.conversation_manager import ConversationManager
+
 from strands_template import TemplateConversationManager
 
 
-def test_template_conversation_manager_init():
-    """Test initialization."""
+def test_template_conversation_manager_implements_interface():
+    """Constructing proves the skeleton implements every abstract method."""
     cm = TemplateConversationManager()
-    assert cm is not None
+    assert isinstance(cm, ConversationManager)
