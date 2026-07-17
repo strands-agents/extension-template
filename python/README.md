@@ -203,4 +203,4 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE) for details.
+Apache 2.0 — see [LICENSE](../LICENSE) for details.
