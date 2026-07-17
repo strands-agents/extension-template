@@ -57,7 +57,7 @@ Releases are scoped per language so the two halves of this monorepo can ship ind
 | `python-v*`   | [`publish-python.yml`](.github/workflows/publish-python.yml)         | PyPI         |
 | `typescript-v*` | [`publish-typescript.yml`](.github/workflows/publish-typescript.yml) | npm          |
 
-Once you've run the setup script for your language of choice, you can drop the dual-prefix scheme and use the standard `v*` form if you'd rather not carry the monorepo conventions into your own repo.
+When the setup script hoists your chosen language to the repo root, it drops the dual-prefix scheme automatically — generated repos use the standard `v*` tag form.
 
 ## License
 

@@ -246,6 +246,8 @@ def _strip_monorepo_from_readme() -> None:
         # The hoist puts the package at the repo root, so the python/ subdir
         # referenced in the clone instructions no longer exists.
         line = line.replace("cd your-repo-name/python", "cd your-repo-name")
+        # LICENSE sits next to the README once the package is hoisted.
+        line = line.replace("[LICENSE](../LICENSE)", "[LICENSE](LICENSE)")
         if "tag prefixed `python-v`" in line:
             line = (
                 "2. Create a release on GitHub with a tag prefixed `v`, "
