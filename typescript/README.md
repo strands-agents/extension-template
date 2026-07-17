@@ -142,10 +142,13 @@ You can publish manually or through GitHub Actions.
 
 The included workflow automatically publishes to npm when you create a GitHub release with a tag prefixed `typescript-v` (e.g. `typescript-v0.1.0`). The prefix lets the monorepo distinguish python and typescript releases.
 
-1. Configure an `NPM_TOKEN` secret in your GitHub repository (Account Settings → Access Tokens on npm, scope: Automation).
-2. Bump the `version` in `package.json` (or use `npm version`) — the workflow publishes the version that's currently in `package.json`.
-3. Create a release on GitHub with a tag like `typescript-v0.1.0`.
-4. The workflow runs checks, builds, and publishes.
+1. Create an environment named `npm` in your GitHub repository (Settings → Environments). Add required reviewers if you want publishes gated behind approval.
+2. Add an `NPM_TOKEN` secret to that environment (Account Settings → Access Tokens on npm, scope: Automation).
+3. Bump the `version` in `package.json` (or use `npm version`) — the workflow publishes the version that's currently in `package.json`.
+4. Create a release on GitHub with a tag like `typescript-v0.1.0`.
+5. The workflow runs checks, builds, and publishes.
+
+**Note:** If you create a release without configuring the environment and token, the workflow will fail. Set this up before your first release.
 
 ### Option 2: Manual publish
 

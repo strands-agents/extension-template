@@ -59,6 +59,11 @@ jobs:
     name: Publish to npm
     needs: check
     runs-on: ubuntu-latest
+    # Mirrors the pypi environment on the Python side: create an `npm`
+    # environment in repo settings to gate publishes behind required
+    # reviewers, and scope the NPM_TOKEN secret to it.
+    environment:
+      name: npm
     permissions:
       contents: read
       id-token: write
