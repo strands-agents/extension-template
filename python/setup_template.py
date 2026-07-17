@@ -400,7 +400,7 @@ def main() -> None:
 
     print(f"\n  PyPI package: strands-{kebab_name}")
     print(f"  Module:       strands_{snake_name}")
-    print(f"  Classes:      {pascal_name}Model, {pascal_name}Hooks, etc.")
+    print(f"  Classes:      {pascal_name}Model, {pascal_name}Plugin, etc.")
 
     # Select components
     selected = select_components()
@@ -490,6 +490,8 @@ def main() -> None:
         "../CODE_OF_CONDUCT.md",  # template repo's own conduct file
         "../CONTRIBUTING.md",     # template repo's own contributing guide
         "../NOTICE",              # Amazon's copyright notice for the template
+        # Exercises the setup scripts, which self-delete — meaningless in generated repos.
+        "../.github/workflows/ci-setup.yml",
     ]
     for target in cleanup_targets:
         if os.path.exists(target):

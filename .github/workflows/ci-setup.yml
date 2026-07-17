@@ -1,0 +1,141 @@
+name: CI - Setup Script
+
+# The setup scripts are the first thing every template user runs, and the
+# most complex code in the repo: they rewrite workflow YAML, hoist
+# directories, and rename exports. Exercise them end-to-end: run the script
+# non-interactively, then run the generated project's full check suite.
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'python/**'
+      - 'typescript/**'
+      - '.github/workflows/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'python/**'
+      - 'typescript/**'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup-python:
+    name: Python - ${{ matrix.variant }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # hoist-all: every component, drop the TS half, hoist to repo root.
+        # subset: tool + plugin only, keep the monorepo layout.
+        variant: [hoist-all, subset]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install hatch
+        run: pip install hatch pyyaml
+
+      - name: Run setup script (hoist-all)
+        if: matrix.variant == 'hoist-all'
+        working-directory: python
+        # Answers: package name, components, author, email, github user,
+        # description (defaults), confirm, hoist.
+        run: printf 'acme\n1,2,3,4,5,6,7\n\n\n\n\ny\ny\n' | python setup_template.py
+
+      - name: Run setup script (subset)
+        if: matrix.variant == 'subset'
+        working-directory: python
+        run: printf 'acme\n1,3\n\n\n\n\ny\nn\n' | python setup_template.py
+
+      - name: Run checks on generated project (hoist-all)
+        if: matrix.variant == 'hoist-all'
+        run: |
+          test -f src/strands_acme/__init__.py
+          test ! -d python
+          test ! -d typescript
+          test -f .github/workflows/ci.yml
+          test -f .github/workflows/publish.yml
+          python -c "import yaml,glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + ['.github/dependabot.yml']]"
+          hatch run prepare
+
+      - name: Run checks on generated project (subset)
+        if: matrix.variant == 'subset'
+        working-directory: python
+        run: |
+          test -f src/strands_acme/plugin.py
+          test ! -f src/strands_acme/model.py
+          test ! -f tests/test_model.py
+          hatch run prepare
+
+  setup-typescript:
+    name: TypeScript - ${{ matrix.variant }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant: [hoist-all, subset]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        working-directory: typescript
+        run: npm ci
+
+      - name: Run setup script (hoist-all)
+        if: matrix.variant == 'hoist-all'
+        working-directory: typescript
+        run: printf 'acme\n1,2,3,4,5,6,7\n\n\n\n\ny\ny\n' | npx tsx setup-template.ts
+
+      - name: Run setup script (subset)
+        if: matrix.variant == 'subset'
+        working-directory: typescript
+        run: printf 'acme\n1,3\n\n\n\n\ny\nn\n' | npx tsx setup-template.ts
+
+      - name: Run checks on generated project (hoist-all)
+        if: matrix.variant == 'hoist-all'
+        run: |
+          test -f src/index.ts
+          test ! -d typescript
+          test ! -d python
+          test -f .github/workflows/ci.yml
+          test -f .github/workflows/publish.yml
+          python3 -m pip install --quiet pyyaml
+          python3 -c "import yaml,glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + ['.github/dependabot.yml']]"
+          npm install
+          npm run check
+          npm run build
+
+      - name: Run checks on generated project (subset)
+        if: matrix.variant == 'subset'
+        working-directory: typescript
+        run: |
+          test -f src/plugin.ts
+          test ! -f src/model.ts
+          test ! -f test/model.test.ts
+          npm install
+          npm run check
+          npm run build
