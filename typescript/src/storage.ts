@@ -21,6 +21,7 @@
 
 import type { Storage } from '@strands-agents/sdk'
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface TemplateStorageConfig {
   // TODO: Add backend-specific fields your storage needs.
 }
