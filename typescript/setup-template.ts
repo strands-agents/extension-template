@@ -84,6 +84,13 @@ const COMPONENTS: Record<string, ComponentSpec> = {
     testFiles: ['memory-store.test.ts'],
     exports: ['TemplateMemoryStore', 'TemplateMemoryStoreConfig'],
   },
+  storage: {
+    name: 'Storage',
+    description: 'Persist raw bytes under string keys for sessions, offloading, etc.',
+    files: ['storage.ts'],
+    testFiles: ['storage.test.ts'],
+    exports: ['TemplateStorage', 'TemplateStorageConfig'],
+  },
 }
 
 const SRC_DIR = 'src'
@@ -304,6 +311,8 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     TemplateConversationManager: `${pascalName}ConversationManager`,
     TemplateMemoryStoreConfig: `${pascalName}MemoryStoreConfig`,
     TemplateMemoryStore: `${pascalName}MemoryStore`,
+    TemplateStorageConfig: `${pascalName}StorageConfig`,
+    TemplateStorage: `${pascalName}Storage`,
     // Tool function name
     templateTool: `${camelName}Tool`,
     template_tool: `${camelName.replace(/([A-Z])/g, '_$1').toLowerCase()}_tool`,

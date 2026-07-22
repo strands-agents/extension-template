@@ -70,6 +70,13 @@ COMPONENTS = {
         "test_files": ["test_memory_store.py"],
         "exports": ["TemplateMemoryStore"],
     },
+    "storage": {
+        "name": "Storage",
+        "description": "Persist raw bytes under string keys for sessions, offloading, etc.",
+        "files": ["storage.py"],
+        "test_files": ["test_storage.py"],
+        "exports": ["TemplateStorage"],
+    },
 }
 
 
@@ -437,6 +444,7 @@ def main() -> None:
         "TemplateSessionManager": f"{pascal_name}SessionManager",
         "TemplateConversationManager": f"{pascal_name}ConversationManager",
         "TemplateMemoryStore": f"{pascal_name}MemoryStore",
+        "TemplateStorage": f"{pascal_name}Storage",
         # Function names
         "template_tool": f"{snake_name}_tool",
         # Plugin name
