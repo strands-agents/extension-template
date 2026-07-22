@@ -4,7 +4,7 @@ import { TemplateStorage } from '../src/storage.js'
 
 describe('TemplateStorage', () => {
   it('satisfies the Storage interface', () => {
-    const storage: Storage = new TemplateStorage({ connectionString: 'memory://' })
+    const storage: Storage = new TemplateStorage({})
     expect(typeof storage.write).toBe('function')
     expect(typeof storage.read).toBe('function')
     expect(typeof storage.delete).toBe('function')

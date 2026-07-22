@@ -19,18 +19,14 @@ class TemplateStorage:
         from strands.session import SessionManager
         from strands_template import TemplateStorage
 
-        storage = TemplateStorage(connection_string="...")
+        storage = TemplateStorage()
         agent = Agent(session_manager=SessionManager(storage=storage))
         ```
     """
 
-    def __init__(self, connection_string: str) -> None:
-        """Initialize the storage backend.
-
-        Args:
-            connection_string: Backend-specific connection string.
-        """
-        self.connection_string = connection_string
+    def __init__(self) -> None:
+        """Initialize the storage backend."""
+        # TODO: Add backend-specific constructor arguments.
 
     async def write(self, key: str, data: bytes) -> None:
         """Store data under key, overwriting any existing value.

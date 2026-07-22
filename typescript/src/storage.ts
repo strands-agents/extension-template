@@ -10,7 +10,7 @@
  * import { Agent, SessionManager } from '@strands-agents/sdk'
  * import { TemplateStorage } from 'strands-template'
  *
- * const storage = new TemplateStorage({ connectionString: '...' })
+ * const storage = new TemplateStorage({})
  * const session = new SessionManager({
  *   sessionId: 'abc',
  *   storage: { snapshot: storage },
@@ -22,8 +22,7 @@
 import type { Storage } from '@strands-agents/sdk'
 
 export interface TemplateStorageConfig {
-  /** Connection string, base path, bucket name, or whatever your backend needs. */
-  connectionString: string
+  // TODO: Add backend-specific fields your storage needs.
 }
 
 export class TemplateStorage implements Storage {

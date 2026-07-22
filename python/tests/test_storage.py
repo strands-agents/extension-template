@@ -7,11 +7,11 @@ from strands_template import TemplateStorage
 
 def test_template_storage_init():
     """Test initialization."""
-    storage = TemplateStorage(connection_string="memory://")
-    assert storage.connection_string == "memory://"
+    storage = TemplateStorage()
+    assert isinstance(storage, TemplateStorage)
 
 
 def test_satisfies_storage_protocol():
     """TemplateStorage satisfies the Storage protocol."""
-    storage = TemplateStorage(connection_string="memory://")
+    storage = TemplateStorage()
     assert isinstance(storage, Storage)
