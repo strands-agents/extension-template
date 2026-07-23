@@ -34,7 +34,7 @@ You can keep both subprojects in the same repo if your package ships SDKs in bot
 
 ## What's in each template
 
-Both templates expose the same seven Strands extension points so you can pick whichever fits your use case:
+Both templates expose the same eight Strands extension points so you can pick whichever fits your use case:
 
 | Component            | Purpose                                                |
 |----------------------|--------------------------------------------------------|
@@ -45,6 +45,7 @@ Both templates expose the same seven Strands extension points so you can pick wh
 | Session manager      | Persist conversations across restarts                  |
 | Conversation manager | Control context window and message history            |
 | Memory store         | Give agents cross-session knowledge via a search backend |
+| Storage              | Persist raw bytes under string keys for sessions, offloading, etc. |
 
 The interactive setup script in each subdirectory removes the components you don't select, renames everything to your package name, and wires up `pyproject.toml` / `package.json` accordingly.
 
