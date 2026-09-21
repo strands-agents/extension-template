@@ -3,15 +3,21 @@
 import builtins
 import logging
 
+from strands.storage import Storage
+
 logger = logging.getLogger(__name__)
 
 
-class TemplateStorage:
+class TemplateStorage(Storage):
     """Template storage backend implementation.
 
     Storage backends persist raw bytes under string keys. The SDK uses the
     Storage interface for session snapshots, context offloading, and any
     construct that needs durable key-value persistence.
+
+    Implement the four persistence methods below. The inherited search method
+    provides keyword search over list and read; override it for backend-specific
+    search.
 
     Example:
         ```python
