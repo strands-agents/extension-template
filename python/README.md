@@ -66,6 +66,7 @@ The template includes skeleton implementations for all major Strands extension p
 | `session_manager.py` | Session manager | Persist conversations across restarts |
 | `conversation_manager.py` | Conversation manager | Control context window and message history |
 | `memory_store.py` | Memory store | Give agents cross-session knowledge via a search backend |
+| `storage.py` | Storage | Persist raw bytes under string keys for sessions, context offloading, and other SDK constructs |
 
 The setup script will remove components you don't select, so you only keep what you need.
 
@@ -123,6 +124,10 @@ Memory stores give agents cross-session knowledge. A `MemoryManager` searches on
 
 - [Memory](https://strandsagents.com/docs/user-guide/concepts/memory/overview/) — Documentation
 - [Bedrock Knowledge Base store](https://github.com/strands-agents/harness-sdk/tree/main/strands-py/src/strands/vended_memory_stores/bedrock_knowledge_base) — Implementation example
+
+### Storage
+
+Storage backends provide durable key-value persistence for session snapshots, context offloading, and other SDK constructs. Implement the asynchronous `write()`, `read()`, `delete()`, and `list()` methods in `storage.py` using your backend. Values are raw `bytes`; `read()` returns `None` for a missing key, `delete()` is a no-op for a missing key, and `list()` returns keys matching a prefix in ascending order. The inherited `search()` implementation provides keyword search using `list()` and `read()`; override it only if your backend needs custom search behavior.
 
 ## Testing
 
@@ -183,6 +188,7 @@ Follow these conventions so your package fits the Strands ecosystem:
 | Session manager | `{Name}SessionManager` | `RedisSessionManager` |
 | Conversation manager | `{Name}ConversationManager` | `SummarizingConversationManager` |
 | Memory store | `{Name}MemoryStore` | `RedisMemoryStore` |
+| Storage | `{Name}Storage` | `RedisStorage` |
 | Tool function | `{descriptive_name}` | `search_web`, `send_email` |
 
 ## Get featured

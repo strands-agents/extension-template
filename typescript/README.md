@@ -68,6 +68,7 @@ The template includes skeleton implementations for all major Strands extension p
 | `src/session-manager.ts` | Snapshot storage | Persist conversations across restarts (a `SnapshotStorage` impl plugged into the SDK's `SessionManager`) |
 | `src/conversation-manager.ts` | Conversation manager | Control context window and message history |
 | `src/memory-store.ts` | Memory store | Give agents cross-session knowledge via a search backend |
+| `src/storage.ts` | Storage | Persist raw bytes under string keys for sessions, context offloading, and other SDK constructs |
 
 The setup script will remove components you don't select, so you only keep what you need.
 
@@ -119,6 +120,10 @@ Conversation managers control the context window and how message history grows o
 Memory stores give agents cross-session knowledge. A `MemoryManager` searches one or more stores to recall facts and, for writable stores, writes new ones. Implement `search()` to back memory with your own store — a vector database, a managed search service, or any system that retrieves entries by relevance. For writes, implement whichever sinks fit your backend. `add()` for adding an extracted memory. For discrete-entry backend (e.g. a vector DB), only implement this method. `addMessages()` for ingesting raw conversation turns to extract server-side. Only implement this for backends that support server side extraction. Store identity and behavior (`name`, `description`, `maxSearchResults`, `writable`, `extraction`) come from config via `MemoryStoreConfig`, matching the SDK's own stores; extend `TemplateMemoryStoreConfig` with any backend-specific fields.
 
 - The SDK's `BedrockKnowledgeBaseStore` is a worked `MemoryStore` implementation.
+
+### Storage
+
+Storage backends provide durable key-value persistence for session snapshots, context offloading, and other SDK constructs. Implement the asynchronous `write()`, `read()`, `delete()`, and `list()` methods in `src/storage.ts` using your backend. Values are raw `Uint8Array` bytes; `read()` returns `null` for a missing key, `delete()` is a no-op for a missing key, and `list()` returns keys matching a prefix in ascending order. Add backend-specific configuration fields to `TemplateStorageConfig`. This raw-byte `Storage` interface is distinct from the `SnapshotStorage` interface described above under Session storage.
 
 ## Testing
 
@@ -174,6 +179,7 @@ Follow these conventions so your package fits the Strands ecosystem:
 | Snapshot storage | `{Name}SnapshotStorage` | `RedisSnapshotStorage` |
 | Conversation manager | `{Name}ConversationManager` | `SummarizingConversationManager` |
 | Memory store | `{Name}MemoryStore` | `RedisMemoryStore` |
+| Storage | `{Name}Storage` | `RedisStorage` |
 | Tool factory output | `{descriptiveName}` (camelCase) | `searchWeb`, `sendEmail` |
 
 ## Get featured
