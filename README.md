@@ -11,10 +11,16 @@
   <h2>Build and publish custom components for Strands Agents.</h2>
   <p>
     <a href="https://strandsagents.com/">Documentation</a> ◆
-    <a href="https://github.com/strands-agents/sdk-python">Python SDK</a> ◆
-    <a href="https://github.com/strands-agents/sdk-typescript">TypeScript SDK</a> ◆
-    <a href="https://github.com/strands-agents/tools">Tools</a> ◆
-    <a href="https://strandsagents.com/docs/community/community-packages/">Community Packages</a>
+    <a href="https://github.com/strands-agents/samples">Samples</a> ◆
+    <a href="https://github.com/strands-agents/harness-sdk/tree/main/strands-cli">CLI</a> ◆
+    <a href="https://github.com/strands-agents/harness-sdk/tree/main/strands-mcp">MCP Server</a>
+    <br>
+    Harness (<a href="https://github.com/strands-agents/harness-sdk/tree/main/harness-py">Python</a>, <a href="https://github.com/strands-agents/harness-sdk/tree/main/harness-ts">TypeScript</a>) ◆
+    SDK (<a href="https://github.com/strands-agents/harness-sdk/tree/main/strands-py">Python</a>, <a href="https://github.com/strands-agents/harness-sdk/tree/main/strands-ts">TypeScript</a>) ◆
+    <a href="https://github.com/strands-agents/box">Box</a> ◆
+    <a href="https://github.com/strands-agents/shell">Shell</a> ◆
+    <a href="https://github.com/strands-agents/evals">Evals</a> ◆
+    <a href="https://github.com/strands-labs">Labs</a>
   </p>
 </div>
 
@@ -37,7 +43,7 @@ You can keep both subprojects in the same repo if your package ships SDKs in bot
 
 ## What's in each template
 
-Both templates expose the same eight Strands extension points so you can pick whichever fits your use case:
+Both templates expose the same seven Strands extension points so you can pick whichever fits your use case:
 
 | Component            | Purpose                                                |
 |----------------------|--------------------------------------------------------|
@@ -45,10 +51,9 @@ Both templates expose the same eight Strands extension points so you can pick wh
 | Model provider       | Integrate custom LLM APIs                              |
 | Plugin               | Bundle hooks and tools into a composable package       |
 | Intervention         | Add composable control handlers for authorization, guardrails, and steering |
-| Session manager      | Persist conversations across restarts                  |
 | Conversation manager | Control context window and message history            |
 | Memory store         | Give agents cross-session knowledge via a search backend |
-| Storage              | Persist raw bytes under string keys for sessions, offloading, etc. |
+| Storage              | Persist sessions, offloaded context, and other data under string keys |
 
 The interactive setup script in each subdirectory removes the components you don't select, renames everything to your package name, and wires up `pyproject.toml` / `package.json` accordingly.
 

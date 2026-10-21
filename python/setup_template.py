@@ -42,13 +42,6 @@ COMPONENTS = {
         "test_files": ["test_plugin.py"],
         "exports": ["TemplatePlugin"],
     },
-    "session_manager": {
-        "name": "Session Manager",
-        "description": "Persist conversations across restarts",
-        "files": ["session_manager.py"],
-        "test_files": ["test_session_manager.py"],
-        "exports": ["TemplateSessionManager"],
-    },
     "conversation_manager": {
         "name": "Conversation Manager",
         "description": "Control context window and message history",
@@ -72,7 +65,7 @@ COMPONENTS = {
     },
     "storage": {
         "name": "Storage",
-        "description": "Persist raw bytes under string keys for sessions, offloading, etc.",
+        "description": "Persist sessions, offloaded context, and other data under string keys",
         "files": ["storage.py"],
         "test_files": ["test_storage.py"],
         "exports": ["TemplateStorage"],
@@ -441,7 +434,6 @@ def main() -> None:
         "TemplateModel": f"{pascal_name}Model",
         "TemplatePlugin": f"{pascal_name}Plugin",
         "TemplateIntervention": f"{pascal_name}Intervention",
-        "TemplateSessionManager": f"{pascal_name}SessionManager",
         "TemplateConversationManager": f"{pascal_name}ConversationManager",
         "TemplateMemoryStore": f"{pascal_name}MemoryStore",
         "TemplateStorage": f"{pascal_name}Storage",
