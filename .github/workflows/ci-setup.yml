@@ -108,7 +108,7 @@ jobs:
       - name: Run setup script (hoist-all)
         if: matrix.variant == 'hoist-all'
         working-directory: typescript
-        run: printf 'acme\n1,2,3,4,5,6,7\n\n\n\n\ny\ny\n' | npx tsx setup-template.ts
+        run: printf 'acme\n1,2,3,4,5,6,7,8\n\n\n\n\ny\ny\n' | npx tsx setup-template.ts
 
       - name: Run setup script (subset)
         if: matrix.variant == 'subset'
