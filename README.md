@@ -43,7 +43,7 @@ You can keep both subprojects in the same repo if your package ships SDKs in bot
 
 ## What's in each template
 
-Both templates expose the same seven Strands extension points so you can pick whichever fits your use case:
+Both templates expose the same Strands extension points so you can pick whichever fits your use case. Decision models are TypeScript-only until the Python SDK releases `DecisionModel`.
 
 | Component            | Purpose                                                |
 |----------------------|--------------------------------------------------------|
@@ -54,6 +54,7 @@ Both templates expose the same seven Strands extension points so you can pick wh
 | Conversation manager | Control context window and message history            |
 | Memory store         | Give agents cross-session knowledge via a search backend |
 | Storage              | Persist sessions, offloaded context, and other data under string keys |
+| Decision model       | Answer closed questions over agent state through a decision API |
 
 The interactive setup script in each subdirectory removes the components you don't select, renames everything to your package name, and wires up `pyproject.toml` / `package.json` accordingly.
 

@@ -84,6 +84,13 @@ const COMPONENTS: Record<string, ComponentSpec> = {
     testFiles: ['storage.test.ts'],
     exports: ['TemplateStorage', 'TemplateStorageConfig'],
   },
+  decision_model: {
+    name: 'Decision Model',
+    description: 'Answer closed questions over agent state through a decision API',
+    files: ['decision-model.ts'],
+    testFiles: ['decision-model.test.ts'],
+    exports: ['TemplateDecisionModel', 'TemplateDecisionModelConfig'],
+  },
 }
 
 const SRC_DIR = 'src'
@@ -304,6 +311,8 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     TemplateMemoryStore: `${pascalName}MemoryStore`,
     TemplateStorageConfig: `${pascalName}StorageConfig`,
     TemplateStorage: `${pascalName}Storage`,
+    TemplateDecisionModelConfig: `${pascalName}DecisionModelConfig`,
+    TemplateDecisionModel: `${pascalName}DecisionModel`,
     // Tool function name
     templateTool: `${camelName}Tool`,
     template_tool: `${camelName.replace(/([A-Z])/g, '_$1').toLowerCase()}_tool`,

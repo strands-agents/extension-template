@@ -76,6 +76,7 @@ The template includes skeleton implementations for all major Strands extension p
 | `src/conversation-manager.ts` | Conversation manager | Control context window and message history |
 | `src/memory-store.ts` | Memory store | Give agents cross-session knowledge via a search backend |
 | `src/storage.ts` | Storage | Persist sessions, offloaded context, and other data under string keys |
+| `src/decision-model.ts` | Decision model | Answer closed questions over agent state through a decision API |
 
 The setup script will remove components you don't select, so you only keep what you need.
 
@@ -111,6 +112,12 @@ Intervention handlers provide composable control layers for agents. Override lif
 Model providers connect agents to LLM APIs by extending the `Model` base class. Implement `stream()` to translate between Strands stream events and your provider's wire protocol.
 
 - The SDK's `BedrockModel` (`@strands-agents/sdk/models/bedrock`) is the canonical reference implementation.
+
+### Decision models
+
+Decision models answer closed questions (yes/no or one of a fixed set of choices) over agent state by extending the `DecisionModel` base class. Implement `_ask()` to call your provider's decision API and return one answer per question. The base class validates questions and records tracing and usage.
+
+- The SDK's [`TypeSafeDecisionModel`](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/decisions/typesafe-decision-model.ts) is a worked example.
 
 ### Storage
 
@@ -180,6 +187,7 @@ Follow these conventions so your package fits the Strands ecosystem:
 |------|------------|---------|
 | npm package | `strands-{name}` | `strands-amazon` |
 | Model class | `{Name}Model` | `AmazonModel` |
+| Decision model class | `{Name}DecisionModel` | `TypeSafeDecisionModel` |
 | Plugin class | `{Name}Plugin` | `AmazonPlugin` |
 | Intervention class | `{Name}Intervention` | `CedarIntervention` |
 | Storage class | `{Name}Storage` | `RedisStorage` |
