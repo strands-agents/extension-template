@@ -35,6 +35,9 @@ jobs:
         # subset: tool + plugin only, keep the monorepo layout.
         variant: [hoist-all, subset]
       fail-fast: false
+    env:
+      SETUP_AUTHOR: 'Example "Author" \ Contributor'
+      SETUP_DESCRIPTION: 'Tools for "search" in C:\work — 日本語 🧪'
 
     steps:
       - name: Checkout code
@@ -48,14 +51,13 @@ jobs:
           python-version: '3.10'
 
       - name: Install hatch
-        run: pip install hatch pyyaml
+        run: pip install hatch pyyaml tomli
 
       - name: Run setup script (hoist-all)
         if: matrix.variant == 'hoist-all'
         working-directory: python
-        # Answers: package name, components, author, email, github user,
-        # description (defaults), confirm, hoist.
-        run: printf 'acme\n1,2,3,4,5,6,7\n\n\n\n\ny\ny\n' | python setup_template.py
+        # Exercise quotes, backslashes, and Unicode in free-form metadata.
+        run: printf '%s\n' acme '1,2,3,4,5,6,7' "$SETUP_AUTHOR" '' '' "$SETUP_DESCRIPTION" y y | python setup_template.py
 
       - name: Run setup script (subset)
         if: matrix.variant == 'subset'
@@ -71,6 +73,14 @@ jobs:
           test -f .github/workflows/ci.yml
           test -f .github/workflows/publish.yml
           python -c "import yaml,glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + ['.github/dependabot.yml']]"
+          python - <<'PY'
+          import os
+          import tomli
+          with open("pyproject.toml", "rb") as file:
+              project = tomli.load(file)["project"]
+          assert project["description"] == os.environ["SETUP_DESCRIPTION"]
+          assert project["authors"][0]["name"] == os.environ["SETUP_AUTHOR"]
+          PY
           hatch run prepare
 
       - name: Run checks on generated project (subset)
@@ -89,6 +99,9 @@ jobs:
       matrix:
         variant: [hoist-all, subset]
       fail-fast: false
+    env:
+      SETUP_AUTHOR: 'Example "Author" \ Contributor'
+      SETUP_DESCRIPTION: 'Tools for "search" in C:\work — 日本語 🧪'
 
     steps:
       - name: Checkout code
@@ -108,7 +121,7 @@ jobs:
       - name: Run setup script (hoist-all)
         if: matrix.variant == 'hoist-all'
         working-directory: typescript
-        run: printf 'acme\n1,2,3,4,5,6,7\n\n\n\n\ny\ny\n' | npx tsx setup-template.ts
+        run: printf '%s\n' acme '1,2,3,4,5,6,7' "$SETUP_AUTHOR" '' '' "$SETUP_DESCRIPTION" y y | npx tsx setup-template.ts
 
       - name: Run setup script (subset)
         if: matrix.variant == 'subset'
@@ -125,6 +138,13 @@ jobs:
           test -f .github/workflows/publish.yml
           python3 -m pip install --quiet pyyaml
           python3 -c "import yaml,glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + ['.github/dependabot.yml']]"
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict'
+          import fs from 'node:fs'
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+          assert.equal(pkg.description, process.env.SETUP_DESCRIPTION)
+          assert.equal(pkg.author, `${process.env.SETUP_AUTHOR} <your.email@example.com>`)
+          JS
           npm install
           npm run check
           npm run build

@@ -146,7 +146,13 @@ function applyReplacements(value: string, replacements: Record<string, string>):
 
 function replaceInFile(filepath: string, replacements: Record<string, string>): void {
   const content = fs.readFileSync(filepath, 'utf8')
-  fs.writeFileSync(filepath, applyReplacements(content, replacements), 'utf8')
+  const fileReplacements =
+    filepath === 'package.json'
+      ? Object.fromEntries(
+          Object.entries(replacements).map(([key, value]) => [key, JSON.stringify(value).slice(1, -1)])
+        )
+      : replacements
+  fs.writeFileSync(filepath, applyReplacements(content, fileReplacements), 'utf8')
 }
 
 // ---------------------------------------------------------------------------
