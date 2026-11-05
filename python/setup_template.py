@@ -15,6 +15,7 @@ Usage:
     python setup_template.py
 """
 
+import json
 import os
 import re
 import shutil
@@ -132,6 +133,9 @@ def replace_in_file(filepath: str, replacements: dict[str, str]) -> None:
         content = f.read()
 
     for old, new in replacements.items():
+        if filepath == "pyproject.toml":
+            # TOML basic strings need JSON escapes and an explicit escape for DEL.
+            new = json.dumps(new, ensure_ascii=False)[1:-1].replace("\x7f", "\\u007f")
         content = content.replace(old, new)
 
     with open(filepath, "w", encoding="utf-8") as f:
