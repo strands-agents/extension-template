@@ -16,7 +16,13 @@
  * ```
  */
 
-import { DecisionModel, type DecisionInput, type DecisionResult, type Question } from '@strands-agents/sdk'
+import {
+  DecisionModel,
+  type DecisionCallOptions,
+  type DecisionInput,
+  type DecisionResult,
+  type Question,
+} from '@strands-agents/sdk'
 
 export interface TemplateDecisionModelConfig {
   /** API key for the upstream provider. */
@@ -30,14 +36,16 @@ export class TemplateDecisionModel extends DecisionModel {
 
   protected override async _ask<const Q extends Record<string, Question>>(
     _state: DecisionInput,
-    _questions: Q
+    _questions: Q,
+    _options: DecisionCallOptions
   ): Promise<DecisionResult<Q>> {
     // TODO: Send the state and questions to your provider and map its response.
     //
     // Return one answer per question key: a boolean for `choices: 'boolean'`,
     // one of the listed choices otherwise, or `new Uncertain()` when the
     // question allows it. Set `metadata.latencyMs` from the provider call and
-    // `usage` when the provider reports token counts.
+    // `usage` when the provider reports token counts. Forward
+    // the `cancelSignal` option to the request so callers can abort it.
     //
     // See the SDK's TypeSafeDecisionModel for a worked example.
     throw new Error('Not implemented')

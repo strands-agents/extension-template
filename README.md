@@ -43,7 +43,7 @@ You can keep both subprojects in the same repo if your package ships SDKs in bot
 
 ## What's in each template
 
-Both templates expose the same Strands extension points so you can pick whichever fits your use case. Decision models are TypeScript-only until the Python SDK releases `DecisionModel`.
+Both templates expose the same eight Strands extension points so you can pick whichever fits your use case:
 
 | Component            | Purpose                                                |
 |----------------------|--------------------------------------------------------|

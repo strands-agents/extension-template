@@ -73,6 +73,7 @@ The template includes skeleton implementations for all major Strands extension p
 | `conversation_manager.py` | Conversation manager | Control context window and message history |
 | `memory_store.py` | Memory store | Give agents cross-session knowledge via a search backend |
 | `storage.py` | Storage | Persist sessions, offloaded context, and other data under string keys |
+| `decision_model.py` | Decision model | Answer closed questions over agent state through a decision API |
 
 The setup script will remove components you don't select, so you only keep what you need.
 
@@ -109,6 +110,13 @@ Model providers connect agents to LLM APIs. Implement the `stream()` method to r
 
 - [Custom providers](https://strandsagents.com/docs/user-guide/sdk/model-providers/custom_model_provider/) - Documentation
 - [strands-clova](https://github.com/aidendef/strands-clova) - Community model provider example
+
+### Decision models
+
+Decision models answer closed questions (yes/no or one of a fixed set of choices) over agent state. Subclass `DecisionModel` and implement `_ask()` to call your provider's decision API and return one answer per question. The base class validates questions and records tracing and usage.
+
+- [Custom decision models](https://strandsagents.com/docs/user-guide/sdk/decision-models/models/#custom-decision-models) - Documentation
+- [TypeSafeDecisionModel](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/decisions/typesafe_decision_model.py) - Implementation example
 
 ### Storage
 
@@ -185,6 +193,7 @@ Follow these conventions so your package fits the Strands ecosystem:
 | PyPI package | `strands-{name}` | `strands-amazon` |
 | Python module | `strands_{name}` | `strands_amazon` |
 | Model class | `{Name}Model` | `AmazonModel` |
+| Decision model class | `{Name}DecisionModel` | `TypeSafeDecisionModel` |
 | Plugin class | `{Name}Plugin` | `AmazonPlugin` |
 | Intervention class | `{Name}Intervention` | `CedarIntervention` |
 | Storage class | `{Name}Storage` | `RedisStorage` |

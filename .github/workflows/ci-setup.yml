@@ -55,7 +55,7 @@ jobs:
         working-directory: python
         # Answers: package name, components, author, email, github user,
         # description (defaults), confirm, hoist.
-        run: printf 'acme\n1,2,3,4,5,6,7\n\n\n\n\ny\ny\n' | python setup_template.py
+        run: printf 'acme\n1,2,3,4,5,6,7,8\n\n\n\n\ny\ny\n' | python setup_template.py
 
       - name: Run setup script (subset)
         if: matrix.variant == 'subset'

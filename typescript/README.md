@@ -117,6 +117,7 @@ Model providers connect agents to LLM APIs by extending the `Model` base class. 
 
 Decision models answer closed questions (yes/no or one of a fixed set of choices) over agent state by extending the `DecisionModel` base class. Implement `_ask()` to call your provider's decision API and return one answer per question. The base class validates questions and records tracing and usage.
 
+- [Custom decision models](https://strandsagents.com/docs/user-guide/sdk/decision-models/models/#custom-decision-models) covers the contract `_ask()` must meet.
 - The SDK's [`TypeSafeDecisionModel`](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/decisions/typesafe-decision-model.ts) is a worked example.
 
 ### Storage
