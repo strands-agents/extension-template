@@ -70,6 +70,13 @@ COMPONENTS = {
         "test_files": ["test_storage.py"],
         "exports": ["TemplateStorage"],
     },
+    "decision_model": {
+        "name": "Decision Model",
+        "description": "Answer closed questions over agent state through a decision API",
+        "files": ["decision_model.py"],
+        "test_files": ["test_decision_model.py"],
+        "exports": ["TemplateDecisionModel"],
+    },
 }
 
 
@@ -437,6 +444,7 @@ def main() -> None:
         "TemplateConversationManager": f"{pascal_name}ConversationManager",
         "TemplateMemoryStore": f"{pascal_name}MemoryStore",
         "TemplateStorage": f"{pascal_name}Storage",
+        "TemplateDecisionModel": f"{pascal_name}DecisionModel",
         # Function names
         "template_tool": f"{snake_name}_tool",
         # Plugin name
