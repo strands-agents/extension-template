@@ -57,7 +57,7 @@ jobs:
         if: matrix.variant == 'hoist-all'
         working-directory: python
         # Exercise quotes, backslashes, and Unicode in free-form metadata.
-        run: printf '%s\n' acme '1,2,3,4,5,6,7' "$SETUP_AUTHOR" '' '' "$SETUP_DESCRIPTION" y y | python setup_template.py
+        run: printf '%s\n' acme '1,2,3,4,5,6,7,8' "$SETUP_AUTHOR" '' '' "$SETUP_DESCRIPTION" y y | python setup_template.py
 
       - name: Run setup script (subset)
         if: matrix.variant == 'subset'
@@ -121,7 +121,7 @@ jobs:
       - name: Run setup script (hoist-all)
         if: matrix.variant == 'hoist-all'
         working-directory: typescript
-        run: printf '%s\n' acme '1,2,3,4,5,6,7' "$SETUP_AUTHOR" '' '' "$SETUP_DESCRIPTION" y y | npx tsx setup-template.ts
+        run: printf '%s\n' acme '1,2,3,4,5,6,7,8' "$SETUP_AUTHOR" '' '' "$SETUP_DESCRIPTION" y y | npx tsx setup-template.ts
 
       - name: Run setup script (subset)
         if: matrix.variant == 'subset'
