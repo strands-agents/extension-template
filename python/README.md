@@ -53,6 +53,15 @@ You'll be prompted for:
 - **Components** — Which extension points you want to include (tool, model, etc.)
 - **Author info** — Your name, email, and GitHub username for `pyproject.toml`.
 - **Description** — A one-line description of your package.
+- **Repository layout** — After customization, choose whether to remove the TypeScript half and move the Python package to the repository root. The default answer is `y`.
+
+If you accept the default repository layout, the script removes the `python/` directory after moving its contents. Your shell is still in that now-deleted directory, so return to the repository root before installing dependencies:
+
+```bash
+cd ..
+```
+
+If you answer `n`, keep working in `python/` and run the next step there; do not run `cd ..`.
 
 ### 3. Install dependencies
 
