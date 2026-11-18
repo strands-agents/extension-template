@@ -66,6 +66,8 @@ jobs:
         if: matrix.variant == 'hoist-all'
         run: |
           test -f src/strands_acme/__init__.py
+          test -f src/strands_acme/storage.py
+          test -f tests/test_storage.py
           test ! -d python
           test ! -d typescript
           test -f .github/workflows/ci.yml
@@ -80,6 +82,8 @@ jobs:
           test -f src/strands_acme/plugin.py
           test ! -f src/strands_acme/model.py
           test ! -f tests/test_model.py
+          test ! -f src/strands_acme/storage.py
+          test ! -f tests/test_storage.py
           hatch run prepare
 
   setup-typescript:
@@ -119,6 +123,8 @@ jobs:
         if: matrix.variant == 'hoist-all'
         run: |
           test -f src/index.ts
+          test -f src/storage.ts
+          test -f test/storage.test.ts
           test ! -d typescript
           test ! -d python
           test -f .github/workflows/ci.yml
@@ -136,6 +142,8 @@ jobs:
           test -f src/plugin.ts
           test ! -f src/model.ts
           test ! -f test/model.test.ts
+          test ! -f src/storage.ts
+          test ! -f test/storage.test.ts
           npm install
           npm run check
           npm run build
