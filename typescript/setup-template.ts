@@ -239,7 +239,7 @@ async function selectComponents(prompter: Prompter): Promise<string[]> {
     process.exit(1)
   }
 
-  return selected
+  return [...new Set(selected)]
 }
 
 async function gatherProjectInfo(prompter: Prompter): Promise<ProjectInfo> {
