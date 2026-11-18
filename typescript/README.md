@@ -124,6 +124,8 @@ Decision models answer closed questions (yes/no or one of a fixed set of choices
 
 Storage backends persist raw bytes under string keys. Implement `write()`, `read()`, `delete()`, and `list()`. The SDK's `SessionManager` saves sessions through a `Storage`, so implementing one is how you add a session backend such as S3, Redis, or a custom database. Context offloading uses the same interface.
 
+The asynchronous methods in `src/storage.ts` read and write `Uint8Array` values. Return `null` for a missing key, treat deletion of a missing key as a no-op, and have `list(prefix)` return matching keys in ascending order. Add backend-specific settings to `TemplateStorageConfig`.
+
 - [Session management](https://strandsagents.com/docs/user-guide/sdk/agents/session-management/) - Documentation
 - [Local file storage](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/storage/local-file-storage.ts) - Implementation example
 

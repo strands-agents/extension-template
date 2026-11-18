@@ -122,6 +122,8 @@ Decision models answer closed questions (yes/no or one of a fixed set of choices
 
 Storage backends persist raw bytes under string keys. Implement `write()`, `read()`, `delete()`, and `list()`; the inherited `search()` gives keyword search on top of them. The SDK's `SnapshotSessionManager` saves sessions through a `Storage`, so implementing one is how you add a session backend such as S3, Redis, or a custom database. Context offloading uses the same interface.
 
+The asynchronous methods in `storage.py` read and write `bytes`. Return `None` for a missing key, treat deletion of a missing key as a no-op, and return matching keys in ascending order from `list(prefix)`.
+
 - [Session management](https://strandsagents.com/docs/user-guide/sdk/agents/session-management/) - Documentation
 - [Local file storage](https://github.com/strands-agents/harness-sdk/blob/main/strands-py/src/strands/storage/local_file_storage.py) - Implementation example
 
