@@ -11,12 +11,20 @@
   <h2>Build and publish custom TypeScript components for Strands Agents.</h2>
   <p>
     <a href="https://strandsagents.com/">Documentation</a> ◆
-    <a href="https://github.com/strands-agents/sdk-typescript">TypeScript SDK</a> ◆
-    <a href="https://strandsagents.com/docs/community/community-packages/">Community Packages</a>
+    <a href="https://github.com/strands-agents/samples">Samples</a> ◆
+    <a href="https://github.com/strands-agents/harness-sdk/tree/main/strands-cli">CLI</a> ◆
+    <a href="https://github.com/strands-agents/harness-sdk/tree/main/strands-mcp">MCP Server</a>
+    <br>
+    Harness (<a href="https://github.com/strands-agents/harness-sdk/tree/main/harness-py">Python</a>, <a href="https://github.com/strands-agents/harness-sdk/tree/main/harness-ts">TypeScript</a>) ◆
+    SDK (<a href="https://github.com/strands-agents/harness-sdk/tree/main/strands-py">Python</a>, <a href="https://github.com/strands-agents/harness-sdk/tree/main/strands-ts">TypeScript</a>) ◆
+    <a href="https://github.com/strands-agents/box">Box</a> ◆
+    <a href="https://github.com/strands-agents/shell">Shell</a> ◆
+    <a href="https://github.com/strands-agents/evals">Evals</a> ◆
+    <a href="https://github.com/strands-labs">Labs</a>
   </p>
 </div>
 
-This template helps you build and publish custom components for [Strands Agents](https://github.com/strands-agents/sdk-typescript). Whether you're creating a new tool, model provider, or session storage backend, this directory gives you a starting point with the right structure and conventions.
+This template helps you build and publish custom components for [Strands Agents](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts). Whether you're creating a new tool, model provider, or storage backend, this directory gives you a starting point with the right structure and conventions.
 
 > This is the TypeScript half of the [extension-template](../README.md) monorepo. For the Python equivalent, see [`../python/`](../python/).
 
@@ -65,10 +73,10 @@ The template includes skeleton implementations for all major Strands extension p
 | `src/model.ts` | Model provider | Integrate custom LLM APIs |
 | `src/plugin.ts` | Plugin | Extend agent behavior with hooks and tools in a composable package |
 | `src/intervention.ts` | Intervention | Add composable control handlers for authorization, guardrails, and steering |
-| `src/session-manager.ts` | Snapshot storage | Persist conversations across restarts (a `SnapshotStorage` impl plugged into the SDK's `SessionManager`) |
 | `src/conversation-manager.ts` | Conversation manager | Control context window and message history |
 | `src/memory-store.ts` | Memory store | Give agents cross-session knowledge via a search backend |
-| `src/storage.ts` | Storage | Persist raw bytes under string keys for sessions, context offloading, and other SDK constructs |
+| `src/storage.ts` | Storage | Persist sessions, offloaded context, and other data under string keys |
+| `src/decision-model.ts` | Decision model | Answer closed questions over agent state through a decision API |
 
 The setup script will remove components you don't select, so you only keep what you need.
 
@@ -80,21 +88,23 @@ Each file contains a minimal skeleton. Here's what to implement:
 
 Tools let agents interact with external systems and perform actions. Implement your callback inside `src/tool.ts`. Use a Zod schema for typed/validated input or a JSON schema for untyped input.
 
-- [Custom tools](https://strandsagents.com/docs/user-guide/concepts/tools/custom-tools/) — Documentation
+- [Creating custom tools](https://strandsagents.com/docs/user-guide/sdk/tools/custom-tools/) - Documentation
+- [sleep](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts/src/vended-tools/sleep) - Simple tool with a configuration factory and cancellation handling
+- [http-request](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts/src/vended-tools/http-request) - Tool with a Zod input schema and typed output
 - See the `tool` factory in `@strands-agents/sdk` for full options.
 
 ### Plugins
 
 Plugins provide a composable way to extend agent behavior by bundling hooks and tools into a single package. Implement `initAgent` to register hooks and `getTools` to contribute tools.
 
-- [Plugins](https://strandsagents.com/docs/user-guide/concepts/plugins/) — Documentation
+- [Plugins](https://strandsagents.com/docs/user-guide/sdk/plugins/) - Documentation
 - The SDK's `SessionManager` and `vended-plugins/skills` are good worked examples.
 
 ### Interventions
 
 Intervention handlers provide composable control layers for agents. Override lifecycle methods (like `beforeToolCall`) to intercept events and return typed decisions: proceed, deny, guide, confirm, or transform. Use them for authorization checks, guardrails, and human-in-the-loop approval.
 
-- [Interventions](https://strandsagents.com/docs/user-guide/concepts/agents/interventions/) — Documentation
+- [Interventions](https://strandsagents.com/docs/user-guide/sdk/agents/interventions/) - Documentation
 - The SDK's `vended-interventions` (Cedar authorization, HITL, steering) are worked examples.
 
 ### Model providers
@@ -103,11 +113,21 @@ Model providers connect agents to LLM APIs by extending the `Model` base class. 
 
 - The SDK's `BedrockModel` (`@strands-agents/sdk/models/bedrock`) is the canonical reference implementation.
 
-### Session storage
+### Decision models
 
-Session persistence lives behind the `SnapshotStorage` interface — implement it to add new backends (S3, Redis, custom DB). The SDK's `FileStorage` is a worked example.
+Decision models answer closed questions (yes/no or one of a fixed set of choices) over agent state by extending the `DecisionModel` base class. Implement `_ask()` to call your provider's decision API and return one answer per question. The base class validates questions and records tracing and usage.
 
-- [Session management](https://strandsagents.com/docs/user-guide/concepts/agents/session-management/) — Documentation
+- [Custom decision models](https://strandsagents.com/docs/user-guide/sdk/decision-models/models/#custom-decision-models) covers the contract `_ask()` must meet.
+- The SDK's [`TypeSafeDecisionModel`](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/decisions/typesafe-decision-model.ts) is a worked example.
+
+### Storage
+
+Storage backends persist raw bytes under string keys. Implement `write()`, `read()`, `delete()`, and `list()`. The SDK's `SessionManager` saves sessions through a `Storage`, so implementing one is how you add a session backend such as S3, Redis, or a custom database. Context offloading uses the same interface.
+
+The asynchronous methods in `src/storage.ts` read and write `Uint8Array` values. Return `null` for a missing key, treat deletion of a missing key as a no-op, and have `list(prefix)` return matching keys in ascending order. Add backend-specific settings to `TemplateStorageConfig`.
+
+- [Session management](https://strandsagents.com/docs/user-guide/sdk/agents/session-management/) - Documentation
+- [Local file storage](https://github.com/strands-agents/harness-sdk/blob/main/strands-ts/src/storage/local-file-storage.ts) - Implementation example
 
 ### Conversation managers
 
@@ -120,10 +140,6 @@ Conversation managers control the context window and how message history grows o
 Memory stores give agents cross-session knowledge. A `MemoryManager` searches one or more stores to recall facts and, for writable stores, writes new ones. Implement `search()` to back memory with your own store — a vector database, a managed search service, or any system that retrieves entries by relevance. For writes, implement whichever sinks fit your backend. `add()` for adding an extracted memory. For discrete-entry backend (e.g. a vector DB), only implement this method. `addMessages()` for ingesting raw conversation turns to extract server-side. Only implement this for backends that support server side extraction. Store identity and behavior (`name`, `description`, `maxSearchResults`, `writable`, `extraction`) come from config via `MemoryStoreConfig`, matching the SDK's own stores; extend `TemplateMemoryStoreConfig` with any backend-specific fields.
 
 - The SDK's `BedrockKnowledgeBaseStore` is a worked `MemoryStore` implementation.
-
-### Storage
-
-Storage backends provide durable key-value persistence for session snapshots, context offloading, and other SDK constructs. Implement the asynchronous `write()`, `read()`, `delete()`, and `list()` methods in `src/storage.ts` using your backend. Values are raw `Uint8Array` bytes; `read()` returns `null` for a missing key, `delete()` is a no-op for a missing key, and `list()` returns keys matching a prefix in ascending order. Add backend-specific configuration fields to `TemplateStorageConfig`. This raw-byte `Storage` interface is distinct from the `SnapshotStorage` interface described above under Session storage.
 
 ## Testing
 
@@ -174,12 +190,12 @@ Follow these conventions so your package fits the Strands ecosystem:
 |------|------------|---------|
 | npm package | `strands-{name}` | `strands-amazon` |
 | Model class | `{Name}Model` | `AmazonModel` |
+| Decision model class | `{Name}DecisionModel` | `TypeSafeDecisionModel` |
 | Plugin class | `{Name}Plugin` | `AmazonPlugin` |
 | Intervention class | `{Name}Intervention` | `CedarIntervention` |
-| Snapshot storage | `{Name}SnapshotStorage` | `RedisSnapshotStorage` |
+| Storage class | `{Name}Storage` | `RedisStorage` |
 | Conversation manager | `{Name}ConversationManager` | `SummarizingConversationManager` |
 | Memory store | `{Name}MemoryStore` | `RedisMemoryStore` |
-| Storage | `{Name}Storage` | `RedisStorage` |
 | Tool factory output | `{descriptiveName}` (camelCase) | `searchWeb`, `sendEmail` |
 
 ## Get featured
@@ -189,8 +205,13 @@ Help others discover your package by adding the `strands-agents` topic to your G
 ## Resources
 
 - [Strands Agents documentation](https://strandsagents.com/)
-- [TypeScript SDK repository](https://github.com/strands-agents/sdk-typescript)
+- [TypeScript SDK](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts)
+- [SDK vended tools](https://github.com/strands-agents/harness-sdk/tree/main/strands-ts/src/vended-tools)
 - [Community packages](https://strandsagents.com/docs/community/community-packages/)
+
+## Security
+
+See [CONTRIBUTING](../CONTRIBUTING.md#security-issue-notifications) for more information.
 
 ## License
 

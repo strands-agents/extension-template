@@ -13,7 +13,8 @@ class TemplateStorage(Storage):
 
     Storage backends persist raw bytes under string keys. The SDK uses the
     Storage interface for session snapshots, context offloading, and any
-    construct that needs durable key-value persistence.
+    construct that needs durable key-value persistence. To add a session
+    backend, implement Storage and pass it to SnapshotSessionManager.
 
     Implement the four persistence methods below. The inherited search method
     provides keyword search over list and read; override it for backend-specific
@@ -22,11 +23,11 @@ class TemplateStorage(Storage):
     Example:
         ```python
         from strands import Agent
-        from strands.session import SessionManager
+        from strands.session import SnapshotSessionManager
         from strands_template import TemplateStorage
 
-        storage = TemplateStorage()
-        agent = Agent(session_manager=SessionManager(storage=storage))
+        session_manager = SnapshotSessionManager(session_id="my-session", storage=TemplateStorage())
+        agent = Agent(session_manager=session_manager)
         ```
     """
 

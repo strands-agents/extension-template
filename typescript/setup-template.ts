@@ -63,13 +63,6 @@ const COMPONENTS: Record<string, ComponentSpec> = {
     testFiles: ['intervention.test.ts'],
     exports: ['TemplateIntervention'],
   },
-  session_manager: {
-    name: 'Session Storage',
-    description: 'Persist conversations across restarts',
-    files: ['session-manager.ts'],
-    testFiles: ['session-manager.test.ts'],
-    exports: ['TemplateSnapshotStorage', 'TemplateSnapshotStorageConfig'],
-  },
   conversation_manager: {
     name: 'Conversation Manager',
     description: 'Control context window and message history',
@@ -86,10 +79,17 @@ const COMPONENTS: Record<string, ComponentSpec> = {
   },
   storage: {
     name: 'Storage',
-    description: 'Persist raw bytes under string keys for sessions, offloading, etc.',
+    description: 'Persist sessions, offloaded context, and other data under string keys',
     files: ['storage.ts'],
     testFiles: ['storage.test.ts'],
     exports: ['TemplateStorage', 'TemplateStorageConfig'],
+  },
+  decision_model: {
+    name: 'Decision Model',
+    description: 'Answer closed questions over agent state through a decision API',
+    files: ['decision-model.ts'],
+    testFiles: ['decision-model.test.ts'],
+    exports: ['TemplateDecisionModel', 'TemplateDecisionModelConfig'],
   },
 }
 
@@ -294,7 +294,7 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     // another key's replacement value (the second pass would re-match inside
     // the first pass's output). Component file names are intentionally NOT
     // renamed — like the Python template, generated projects keep tool.ts,
-    // session-manager.ts, etc.
+    // storage.ts, etc.
     // Package name
     'strands-template': `strands-${kebabName}`,
     // Name strings in initializers
@@ -306,13 +306,13 @@ function buildReplacements(info: ProjectInfo): Record<string, string> {
     TemplateModel: `${pascalName}Model`,
     TemplatePlugin: `${pascalName}Plugin`,
     TemplateIntervention: `${pascalName}Intervention`,
-    TemplateSnapshotStorageConfig: `${pascalName}SnapshotStorageConfig`,
-    TemplateSnapshotStorage: `${pascalName}SnapshotStorage`,
     TemplateConversationManager: `${pascalName}ConversationManager`,
     TemplateMemoryStoreConfig: `${pascalName}MemoryStoreConfig`,
     TemplateMemoryStore: `${pascalName}MemoryStore`,
     TemplateStorageConfig: `${pascalName}StorageConfig`,
     TemplateStorage: `${pascalName}Storage`,
+    TemplateDecisionModelConfig: `${pascalName}DecisionModelConfig`,
+    TemplateDecisionModel: `${pascalName}DecisionModel`,
     // Tool function name
     templateTool: `${camelName}Tool`,
     template_tool: `${camelName.replace(/([A-Z])/g, '_$1').toLowerCase()}_tool`,

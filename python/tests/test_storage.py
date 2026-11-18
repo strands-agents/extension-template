@@ -3,6 +3,7 @@
 from unittest.mock import AsyncMock
 
 import pytest
+from strands.session import SnapshotSessionManager
 from strands.storage import Storage
 
 from strands_template import TemplateStorage
@@ -18,6 +19,12 @@ def test_satisfies_storage_protocol():
     """TemplateStorage satisfies the Storage protocol."""
     storage = TemplateStorage()
     assert isinstance(storage, Storage)
+
+
+def test_backs_snapshot_session_manager():
+    """TemplateStorage can back the SDK's SnapshotSessionManager."""
+    session_manager = SnapshotSessionManager(session_id="test-session", storage=TemplateStorage())
+    assert session_manager.session_id == "test-session"
 
 
 @pytest.mark.parametrize(

@@ -3,19 +3,19 @@
  *
  * Storage backends persist raw bytes under string keys. The SDK uses the
  * {@link Storage} interface for session snapshots, context offloading, and any
- * construct that needs durable key-value persistence.
+ * construct that needs durable key-value persistence. To add a session
+ * backend, implement Storage and pass it to the SDK's {@link SessionManager}.
  *
  * @example
  * ```ts
  * import { Agent, SessionManager } from '@strands-agents/sdk'
  * import { TemplateStorage } from 'strands-template'
  *
- * const storage = new TemplateStorage({})
- * const session = new SessionManager({
- *   sessionId: 'abc',
- *   storage: { snapshot: storage },
+ * const sessionManager = new SessionManager({
+ *   sessionId: 'my-session',
+ *   storage: new TemplateStorage({}),
  * })
- * const agent = new Agent({ sessionManager: session })
+ * const agent = new Agent({ sessionManager })
  * ```
  */
 
